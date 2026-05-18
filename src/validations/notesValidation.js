@@ -25,7 +25,7 @@ const ObjectIdValidator = (value, helpers) => {
   if (isValidObjectId(value)) {
     return value;
   }
-  return helpers.message('Invalid student id');
+  return helpers.message('Invalid note id');
 };
 
 export const noteIdSchema = {
