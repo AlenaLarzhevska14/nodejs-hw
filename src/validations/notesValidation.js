@@ -30,31 +30,19 @@ export const createNoteSchema = {
     content: Joi.string().allow('').optional(),
     tag: Joi.string()
       .valid(...TAGS)
-      .default('Todo'),
+      .optional(),
   }),
 };
 
 export const updateNoteSchema = {
+  [Segments.PARAMS]: Joi.object({
+    noteId: Joi.string().required().custom(ObjectIdValidator),
+  }),
   [Segments.BODY]: Joi.object({
     title: Joi.string().min(1),
     content: Joi.string().allow('').optional(),
     tag: Joi.string()
-      .valid(
-        'Work',
-        'Personal',
-        'Meeting',
-        'Shopping',
-        'Ideas',
-        'Travel',
-        'Finance',
-        'Health',
-        'Important',
-        'Todo',
-      )
+      .valid(...TAGS)
       .optional(),
-  }).min(1),
-
-  [Segments.PARAMS]: Joi.object({
-    noteId: Joi.string().required().custom(ObjectIdValidator),
   }),
 };
