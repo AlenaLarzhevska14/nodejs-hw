@@ -6,7 +6,7 @@ export const getAllNotes = async (req, res) => {
   const skip = (page - 1) * perPage;
   const limit = perPage;
 
-  const notesQuery = Note.find();
+  const notesQuery = Note.find().where('userId').equals(req.user._id);
 
   if (tag) {
     notesQuery.where('tag').equals(tag);
@@ -33,13 +33,6 @@ export const getAllNotes = async (req, res) => {
     totalPages,
     notes,
   });
-};
-
-export const getNotes = async (req, res) => {
-  const notes = await Note.find({
-    userId: req.user._id,
-  });
-  res.status(200).json(notes);
 };
 
 export const getNoteById = async (req, res) => {
@@ -76,8 +69,8 @@ export const deleteNote = async (req, res) => {
 
 export const updateNote = async (req, res) => {
   const { noteId } = req.params;
-  const note = await Note.findByIdAndUpdate(
-    { noteId, userId: req.user._id },
+  const note = await Note.findOneAndUpdate(
+    { _id: noteId, userId: req.user._id },
     req.body,
     { returnDocument: 'after' },
   );
