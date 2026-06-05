@@ -5,6 +5,13 @@ import { createSession, setSessionCookies } from '../services/auth.js';
 import { Session } from '../models/session.js';
 import { sendEmail } from '../utils/sendMail.js';
 import jwt from 'jsonwebtoken';
+import { readFile } from 'node:fs/promises';
+import Handlebars from 'handlebars';
+
+const resetPasswordEmailTemplatePromise = readFile(
+  new URL('../templates/reset-password-email.html', import.meta.url),
+  'utf-8',
+).then((templateSource) => Handlebars.compile(templateSource));
 
 export const registerUser = async (req, res) => {
   const { email, password } = req.body;
@@ -94,7 +101,7 @@ export const refreshUserSession = async (req, res) => {
 };
 
 export const requestResetEmail = async (req, res) => {
-  const user = await User.findOne({ emai: req.body.email });
+  const user = await User.findOne({ email: req.body.email });
   if (!user) {
     return res
       .status(200)
@@ -106,14 +113,19 @@ export const requestResetEmail = async (req, res) => {
     { expiresIn: '15m' },
   );
 
-  const frontEndUrl = `${process.env.FRONTEND_URL}?token=${resetToken}`;
+  const resetLink = `${process.env.FRONTEND_DOMAIN}/reset-password?token=${resetToken}`;
+  const resetPasswordEmailTemplate = await resetPasswordEmailTemplatePromise;
+  const html = resetPasswordEmailTemplate({
+    name: user.username || user.email,
+    resetLink,
+  });
 
   try {
     await sendEmail({
       from: process.env.SMTP_FROM,
       to: req.body.email,
       subject: 'Reset your password',
-      html: `<p>Click <a href="${frontEndUrl}">here</a> to reset your password!</p>`,
+      html,
     });
   } catch {
     throw createHttpError(

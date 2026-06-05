@@ -15,13 +15,17 @@ export const updateUserAvatar = async (req, res, next) => {
     );
     const avatarUrl = uploadResult.secure_url;
 
-    await User.findByIdAndUpdate(
+    const updatedUser = await User.findByIdAndUpdate(
       req.user._id || req.user.id,
       { avatar: avatarUrl },
-      { new: true },
+      { returnDocument: 'after' },
     );
 
-    return res.status(200).json({ url: avatarUrl });
+    if (!updatedUser) {
+      throw createHttpError(404, 'User not found');
+    }
+
+    return res.status(200).json({ url: updatedUser.avatar });
   } catch (err) {
     next(err);
   }
