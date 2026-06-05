@@ -1,6 +1,6 @@
 import { HttpError } from 'http-errors';
 
-export const errorHendler = (err, req, res, next) => {
+export const errorHandler = (err, req, res, next) => {
   console.error(err);
 
   const isProd = process.env.NODE_ENV === 'production';
