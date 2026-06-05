@@ -4,18 +4,19 @@ import {
   registerUserSchema,
   loginUserSchema,
   requestResetEmailSchema,
-  resetPasswordShema,
+  resetPasswordSchema,
   resetPassword,
-} from '../validations/authValidation.js';
+} from './validations/authValidation.js';
 import {
   registerUser,
   loginUser,
   logoutUser,
   refreshUserSession,
   requestResetEmail,
-} from '../controllers/authController.js';
+} from '../controllers/AuthController.js';
 
 const router = Router();
+
 router.post('/auth/register', celebrate(registerUserSchema), registerUser);
 router.post('/auth/login', celebrate(loginUserSchema), loginUser);
 router.post('/auth/logout', logoutUser);
@@ -26,8 +27,8 @@ router.post(
   requestResetEmail,
 );
 router.post(
-  '/auth/reset-password',
-  celebrate(resetPasswordShema),
+  '/auth/request-password',
+  celebrate(resetPasswordSchema),
   resetPassword,
 );
 
