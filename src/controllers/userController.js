@@ -1,14 +1,28 @@
 import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
 import { User } from '../models/user.js';
+import createHttpError from 'http-errors';
 
-export const updateUserAvatar = async (req, res) => {
-  const result = await saveFileToCloudinary(req.file.buffer, req.user._id);
+export const updateUserAvatar = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      throw createHttpError(400, 'No file');
+    }
 
-  const updatedUser = await User.findOneAndUpdate(
-    { _id: req.user._id },
-    { avatar: result.secure_url },
-    { returnDocument: 'after' },
-  );
+    const { buffer } = req.file;
+    const uploadResult = await saveFileToCloudinary(
+      buffer,
+      req.user._id || req.user.id,
+    );
+    const avatarUrl = uploadResult.secure_url;
 
-  res.status(200).json({ url: updatedUser.avatar });
+    await User.findByIdAndUpdate(
+      req.user._id || req.user.id,
+      { avatar: avatarUrl },
+      { new: true },
+    );
+
+    return res.status(200).json({ url: avatarUrl });
+  } catch (err) {
+    next(err);
+  }
 };
